@@ -25,7 +25,15 @@ SPOT_CONF = {
             "alpha": 2.0,
             "beta": 8.0,
         },
-        "lambda_set": 2.5
+        "lambda_set": 3.5,
+        "num_surfer": {
+            "mean": 70,
+            "std": 20
+        },
+        "wave_speed": {
+            "min": 2.2,
+            "max": 4.5,
+        }
     },
     "mixed": {
         "wave_height": {
@@ -38,7 +46,15 @@ SPOT_CONF = {
             "alpha": 5.0,
             "beta": 5.0,
         },
-        "lambda_set": 3.5
+        "lambda_set": 4.5,
+        "num_surfer": {
+            "mean": 40,
+            "std": 10
+        },
+        "wave_speed": {
+            "min": 4.5,
+            "max": 6.7,
+        }
     },
     "advanced": {
         "wave_height": {
@@ -51,26 +67,51 @@ SPOT_CONF = {
             "alpha": 8.0,
             "beta": 2.0,
         },
-        "lambda_set": 4.5
+        "lambda_set": 5.5,
+        "num_surfer": {
+            "mean": 30,
+            "std": 8
+        },
+        "wave_speed": {
+            "min": 6.7,
+            "max": 8.9,
+        }
     },
 }
-
-# Behavioral parameters
-ALPHA_SUCCESS = 0.5          # impact of wave height on success
 
 # Wave set arrival parameters
 WAVESET_ARRIVAL = {
     "shape": 2,
-    "scale": 30,
+    "scale": 3,
 }
 
 # Simulation Setup
-N_SURFERS = 30
 SESSION_DURATION = 3600      # seconds
+# AI idea check - 2
+EXPR_CONF = {
+    "mode": "realistic",      # or "controlled"
+
+    # Only used in controlled mode
+    "num_surfer_fixed": 80,
+    "beginner_ratios": [0.0, 0.2, 0.4, 0.6, 0.8],
+    "beginner_params": (0.0, 0.3),
+    "advanced_params": (0.7, 1.0),
+}
 
 # Scenario settings
-SPOT_LEVEL = "beginner"      # beginner / mixed / advanced
+SPOT_LEVEL = "mixed"      # beginner / mixed / advanced
 RULE_TYPE = "free_for_all"   # free_for_all / first_in_line
 BOARD_TYPE = "longboard"     # shortboard / longboard
 
-
+# Surfer settings
+LINEUP_X_NEAR_SHORE = 10
+LINEUP_X_OUTSIDE = 90
+ATTEMPT_RATE_MIN = 0.1
+ATTEMPT_RATE_MAX = 0.9
+OCEAN_Y_MIN = -50
+OCEAN_Y_MAX = 50
+OCEAN_X_MAX = 150
+BP_X_MIN = 30
+BP_X_MAX = 80
+ALPHA_SUCCESS = 0.5          # impact of wave height on success
+SUCCESS_DISTANCE = 10
