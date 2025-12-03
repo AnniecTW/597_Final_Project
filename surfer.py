@@ -138,6 +138,76 @@ class Surfer:
         p = base * skill_factor
         return min(0.7, max(0.01, p))
 
+    def update_waiting_state(self, rule_type, active_waves):
+        for wave in active_waves:
+            if rule_type == "first_in_line":
+                if any(abs(self.y - oy) <= 3 for oy in wave.occupied_y):
+                    continue
+            if abs(wave.x - self.x) <= 2:
+                attempt = np.random.rand() < self.prob_attempt(wave.height)
+                if attempt:
+                    stood_up = np.random.rand() < self.prob_success(wave.height)
+                    if stood_up:
+                        self.state = 'surfing'
+                        self.curr_riding_wave = wave
+                        self.distance_on_wave = 0
+                        self.ride_already_counted = False
+                        wave.occupied_y.append(self.y)
+                        break
+    def update_paddling_state(self):
+        if self.x > self.bp:
+            self.x -= self.speed
+        else:
+            self.x += self.speed
+
+        if abs(self.x - self.bp) <= 2:
+            self.state = 'waiting'
+
+    def update_surfing_state(self, current_time):
+        # update position
+        self.x -= self.curr_riding_wave.speed
+        self.distance_on_wave += self.curr_riding_wave.speed
+
+        # if the surfer rides safely all the way and reaches the shore,
+        # switch back to paddling and reset wave-related states
+        if self.x <= 0:
+            self.state = 'paddling'
+            self.distance_on_wave = 0
+            self.curr_riding_wave = None
+            self.ride_already_counted = False
+        # check collision by comparing positions with other surfers
+        elif self.check_collisions():
+            self.stats['collisions'] += 1
+            self.state = 'wipeout'
+            return
+        # check wipeout probability
+        elif np.random.rand() < self.prob_wipeout(self.curr_riding_wave.height):
+            self.stats['wipeout'] += 1
+            self.state = 'wipeout'
+            return
+        # if none of the above events occur, update ride distance
+        # count a successful ride once the threshold is reached
+        elif (self.distance_on_wave >= SUCCESS_DISTANCE) and (not self.ride_already_counted):
+            self.stats['success'] += 1
+            self.ride_already_counted = True
+
+            if self.last_catch_time is None:
+                self.last_catch_time = current_time
+            else:
+                self.waiting_time_sum += current_time - self.last_catch_time
+                self.last_catch_time = current_time
+
+    def update_wipeout_state(self):
+        # move all the way toward the shore during a wipeout
+        if self.curr_riding_wave:
+            self.x -= self.curr_riding_wave.speed
+        # once the surfer reaches the shore, reset state to paddling
+        if self.x <= 0:
+            self.state = 'paddling'
+            self.distance_on_wave = 0
+            self.curr_riding_wave = None
+            self.ride_already_counted = False
+
     # Update all surfers every second
     def update_state_and_position(self, rule_type, active_waves, current_time):
         """
@@ -146,73 +216,15 @@ class Surfer:
         :param active_waves:
         :param current_time:
         :return:
+
         """
         if self.state == 'waiting':
-            for wave in active_waves:
-                if rule_type == "first_in_line":
-                    if any(abs(self.y - oy) <= 3 for oy in wave.occupied_y):
-                        continue
-                if abs(wave.x - self.x) <=2:
-                    attempt = np.random.rand() < self.prob_attempt(wave.height)
-                    if attempt:
-                        stood_up = np.random. rand() < self.prob_success(wave.height)
-                        if stood_up:
-                            self.state = 'surfing'
-                            self.curr_riding_wave = wave
-                            self.distance_on_wave = 0
-                            self.ride_already_counted = False
-                            wave.occupied_y.append(self.y)
-                            break
+            self.update_waiting_state(rule_type, active_waves)
         elif self.state == 'paddling':
-            if self.x > self.bp:
-                self.x -= self.speed
-            else:
-                self.x += self.speed
-
-            if abs(self.x - self.bp) <= 2:
-                self.state = 'waiting'
+            self.update_paddling_state()
         elif self.state == 'surfing':
-            # update position
-            self.x -= self.curr_riding_wave.speed
-            self.distance_on_wave += self.curr_riding_wave.speed
-
-            # if the surfer rides safely all the way and reaches the shore,
-            # switch back to paddling and reset wave-related states
-            if self.x <= 0:
-                self.state = 'paddling'
-                self.distance_on_wave = 0
-                self.curr_riding_wave = None
-                self.ride_already_counted = False
-            # check collision by comparing positions with other surfers
-            elif self.check_collisions():
-                self.stats['collisions'] += 1
-                self.state = 'wipeout'
-                return
-            # check wipeout probability
-            elif np.random.rand() < self.prob_wipeout(self.curr_riding_wave.height):
-                self.stats['wipeout'] += 1
-                self.state = 'wipeout'
-                return
-            # if none of the above events occur, update ride distance
-            # count a successful ride once the threshold is reached
-            elif (self.distance_on_wave >= SUCCESS_DISTANCE) and (not self.ride_already_counted):
-                self.stats['success'] += 1
-                self.ride_already_counted = True
-
-                if self.last_catch_time is None:
-                    self.last_catch_time = current_time
-                else:
-                    self.waiting_time_sum += current_time - self.last_catch_time
-                    self.last_catch_time = current_time
+            self.update_surfing_state(current_time)
         elif self.state == 'wipeout':
-            # move all the way toward the shore during a wipeout
-            if self.curr_riding_wave:
-                self.x -= self.curr_riding_wave.speed
-            # once the surfer reaches the shore, reset state to paddling
-            if self.x <= 0:
-                self.state = 'paddling'
-                self.distance_on_wave = 0
-                self.curr_riding_wave = None
-                self.ride_already_counted = False
+            self.update_wipeout_state()
 
 
