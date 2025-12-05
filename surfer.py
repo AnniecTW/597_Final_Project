@@ -81,9 +81,8 @@ class Surfer:
         :param wave_height:
         :return:
         """
-        spot = SPOT_CONF[SPOT_LEVEL]["wave_height"]
-        h_min = spot["min"]
-        h_max = spot["max"]
+        h_min = NORMALIZATION["wave_height"]["min"]
+        h_max = NORMALIZATION["wave_height"]["max"]
 
         # Normalize wave height to [0, 1] to match skill scale
         h = max(0, (wave_height - h_min) / (h_max - h_min))
@@ -110,9 +109,8 @@ class Surfer:
         :param wave_height:
         :return:
         """
-        spot = SPOT_CONF[SPOT_LEVEL]["wave_height"]
-        h_min = spot["min"]
-        h_max = spot["max"]
+        h_min = NORMALIZATION["wave_height"]["min"]
+        h_max = NORMALIZATION["wave_height"]["max"]
 
         # Convert wave height to [0, 1] to measure its impact on a surfer
         h = (wave_height - h_min) / (h_max - h_min)
@@ -124,9 +122,8 @@ class Surfer:
 
     def prob_wipeout(self, wave_height):
 
-        spot = SPOT_CONF[SPOT_LEVEL]["wave_height"]
-        h_min = spot["min"]
-        h_max = spot["max"]
+        h_min = NORMALIZATION["wave_height"]["min"]
+        h_max = NORMALIZATION["wave_height"]["max"]
 
         # Normalize wave height to [0, 1]
         h = (wave_height - h_min) / (h_max - h_min)
@@ -198,6 +195,10 @@ class Surfer:
                 self.last_catch_time = current_time
 
     def update_wipeout_state(self):
+        """
+
+        :return:
+        """
         # move all the way toward the shore during a wipeout
         if self.curr_riding_wave:
             self.x -= self.curr_riding_wave.speed

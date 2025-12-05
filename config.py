@@ -38,7 +38,7 @@ SPOT_CONF = {
     "mixed": {
         "wave_height": {
             "min": 0.5,
-            "max": 3.0,
+            "max": 3.5,
             "mu": 0.8,
             "sigma": 0.35,
         },
@@ -49,7 +49,7 @@ SPOT_CONF = {
         "lambda_set": 4.5,
         "num_surfer": {
             "mean": 40,
-            "std": 10
+            "std": 30
         },
         "wave_speed": {
             "min": 4.5,
@@ -70,7 +70,7 @@ SPOT_CONF = {
         "lambda_set": 5.5,
         "num_surfer": {
             "mean": 30,
-            "std": 8
+            "std": 10
         },
         "wave_speed": {
             "min": 6.7,
@@ -87,6 +87,13 @@ WAVESET_ARRIVAL = {
 
 # Simulation Setup
 SESSION_DURATION = 3600      # seconds
+NORMALIZATION = {
+    "wave_height": {
+        "min": 0.5,
+        "max": 3.0,
+    }
+}
+
 # AI idea check - 2
 EXPR_CONF = {
     "mode": "realistic",      # or "controlled"
@@ -113,5 +120,5 @@ OCEAN_Y_MAX = 50
 OCEAN_X_MAX = 150
 BP_X_MIN = 30
 BP_X_MAX = 80
-ALPHA_SUCCESS = 0.5          # impact of wave height on success
+ALPHA_SUCCESS = 1          # impact of wave height on success
 SUCCESS_DISTANCE = 10

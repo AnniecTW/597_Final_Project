@@ -7,10 +7,10 @@ from surfer import *
 from wave import *
 
 
-def simulate_waves(duration):
+def simulate_waves(duration, spot_conf):
     wave_schedule = []
     t = 0
-    lambda_wavecount = SPOT_CONF[SPOT_LEVEL]['lambda_set']
+    lambda_wavecount = spot_conf['lambda_set']
 
     while t < duration:
         # next wave set generation time
@@ -31,7 +31,7 @@ def simulate_waves(duration):
                 break
 
             # handle wave height
-            wave_height_settings = SPOT_CONF[SPOT_LEVEL]['wave_height']
+            wave_height_settings = spot_conf['wave_height']
             h_max = wave_height_settings['max']
             h_min = wave_height_settings['min']
             h_avg = wave_height_settings['mu']
@@ -40,8 +40,8 @@ def simulate_waves(duration):
             height = min(max(h, h_min), h_max)
 
             # handle wave speed
-            s_min = SPOT_CONF[SPOT_LEVEL]['wave_speed']['min']
-            s_max = SPOT_CONF[SPOT_LEVEL]['wave_speed']['max']
+            s_min = spot_conf['wave_speed']['min']
+            s_max = spot_conf['wave_speed']['max']
             speed = np.random.uniform(s_min, s_max)
 
             wave_schedule.append({'spawn_time': spawn_time, 'height': height, 'speed': speed, 'spawned': False})
@@ -73,7 +73,7 @@ def prep_surfer_config(spot_level, mode, num_surfer, ratio=None):
         # decide number of surfers
         mean = SPOT_CONF[spot_level]["num_surfer"]["mean"]
         std = SPOT_CONF[spot_level]["num_surfer"]["std"]
-        num_surfer = max(1, int(np.random.normal(mean, std)))
+        num_surfer = max(10, min(int(np.random.normal(mean, std)), 150))
 
         # decide skill distribution
         alpha = SPOT_CONF[spot_level]["skill"]["alpha"]
@@ -108,7 +108,7 @@ def prep_surfer_config(spot_level, mode, num_surfer, ratio=None):
 
     return config
 
-def run_simulation(wave_schedule=None, mode=EXPR_CONF["mode"], spot_level=SPOT_LEVEL, num_surfer=EXPR_CONF["num_surfer_fixed"], rule_type=RULE_TYPE, ratio=None, duration=SESSION_DURATION, seed=None):
+def run_simulation(wave_schedule=None, mode=EXPR_CONF["mode"], spot_conf=SPOT_CONF[SPOT_LEVEL], spot_level=SPOT_LEVEL, num_surfer=EXPR_CONF["num_surfer_fixed"], rule_type=RULE_TYPE, ratio=None, duration=SESSION_DURATION, seed=None):
     if seed is not None:
         np.random.seed(seed)
 
@@ -129,7 +129,7 @@ def run_simulation(wave_schedule=None, mode=EXPR_CONF["mode"], spot_level=SPOT_L
 
     # initialize wave schedule
     if wave_schedule is None:
-        wave_schedule = simulate_waves(duration)
+        wave_schedule = simulate_waves(duration, spot_conf)
 
     for t in range(duration): # per second
 
@@ -172,7 +172,7 @@ def run_simulation(wave_schedule=None, mode=EXPR_CONF["mode"], spot_level=SPOT_L
     return session_stats
 
 def main():
-    waves, surfers, stats = run_simulation(seed=40)
+    waves, surfers, stats = run_simulation()
     print(f"Mode: {EXPR_CONF['mode']}")
     print(f"Rule type: {RULE_TYPE}")
     print(stats)
