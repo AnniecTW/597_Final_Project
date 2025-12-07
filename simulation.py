@@ -66,14 +66,15 @@ def gini(x):
     return diff_sum / (2 * n ** 2 * mean_x)
 
 # AI idea organization - 1
-def prep_surfer_config(spot_level, mode, num_surfer, ratio=None):
+def prep_surfer_config(spot_level, mode, ratio, num_surfer):
     config = {}
 
     if mode == "realistic":
         # decide number of surfers
         mean = SPOT_CONF[spot_level]["num_surfer"]["mean"]
         std = SPOT_CONF[spot_level]["num_surfer"]["std"]
-        num_surfer = max(10, min(int(np.random.normal(mean, std)), 150))
+        if num_surfer is None:
+            num_surfer = max(10, min(int(np.random.normal(mean, std)), 150))
 
         # decide skill distribution
         alpha = SPOT_CONF[spot_level]["skill"]["alpha"]
@@ -86,6 +87,8 @@ def prep_surfer_config(spot_level, mode, num_surfer, ratio=None):
 
     elif mode == "experiment":
 
+        if num_surfer is None:
+            num_surfer = EXPR_CONF["num_surfer_fixed"]
         # number of beginners and skilled surfers
         n_beginner = int(round(num_surfer * ratio))
         n_advanced = num_surfer - n_beginner
@@ -108,47 +111,8 @@ def prep_surfer_config(spot_level, mode, num_surfer, ratio=None):
 
     return config
 
-def run_simulation(wave_schedule=None, mode=EXPR_CONF["mode"], spot_conf=SPOT_CONF[SPOT_LEVEL], spot_level=SPOT_LEVEL, num_surfer=EXPR_CONF["num_surfer_fixed"], rule_type=RULE_TYPE, ratio=None, duration=SESSION_DURATION, seed=None):
-    if seed is not None:
-        np.random.seed(seed)
-
-    if mode == "realistic":
-        if ratio is not None:
-            raise ValueError("ratio is not supported for realistic mode")
-        surfer_config = prep_surfer_config(spot_level, mode, num_surfer)
-    elif mode == "experiment":
-        if ratio is None:
-            raise ValueError("experiment mode requires ratio (beginner_ratio)")
-        surfer_config = prep_surfer_config(spot_level, mode, num_surfer, ratio)
-
-    Wave.all_waves = []
-    Surfer.all_surfers = []
-
-    skills = surfer_config["skills"]
-    surfers = [Surfer(skill=s) for s in skills]
-
-    # initialize wave schedule
-    if wave_schedule is None:
-        wave_schedule = simulate_waves(duration, spot_conf)
-
-    for t in range(duration): # per second
-
-        # each second, update arriving waves and check if the session has ended
-        for w in wave_schedule:
-            if (not w['spawned']) and w['spawn_time'] <= t:
-                Wave(w['height'], w['speed'])
-                w['spawned'] = True
-
-        # update each wave's position and existence
-        Wave.update_all()
-
-        # update each surfer's position and state
-        for surfer in surfers:
-            surfer.update_state_and_position(rule_type, Wave.all_waves, t)
-
-
-    # calculate statistics
-    success_wave_counts = [s.stats['success'] for s in surfers] # success wave count for each person
+def compute_stats(surfers,wave_schedule, spot_level, ratio, seed):
+    success_wave_counts = [s.stats['success'] for s in surfers]  # success wave count for each person
     fairness = gini(success_wave_counts)
 
     total_collision = sum(s.stats['collisions'] for s in surfers)
@@ -157,7 +121,7 @@ def run_simulation(wave_schedule=None, mode=EXPR_CONF["mode"], spot_conf=SPOT_CO
     success_counts = np.array([max(1, s.stats['success']) for s in surfers])
     avg_wait_per_wave = wait_sum.sum() / success_counts.sum() if success_counts.sum() else 0
 
-    session_stats = {
+    return {
         "spot_level": spot_level,
         "n_surfers": len(surfers),
         "beginner_ratio": ratio,
@@ -169,7 +133,70 @@ def run_simulation(wave_schedule=None, mode=EXPR_CONF["mode"], spot_conf=SPOT_CO
         "seed": seed,
     }
 
-    return session_stats
+# AI logic organization -1
+def run_simulation(
+        spot_level=SPOT_LEVEL,
+        rule_type=RULE_TYPE,
+        num_surfer=None,
+        ratio=None,
+        spot_conf=None,
+        wave_schedule=None,
+        mode=EXPR_CONF["mode"],
+        duration=SESSION_DURATION,
+        seed=None,
+):
+
+    # Random seed
+    if seed is not None:
+        np.random.seed(seed)
+
+    # Reset global trackers
+    Wave.all_waves = []
+    Surfer.all_surfers = []
+
+    # Prepare spot config:
+    if spot_conf is None:
+        spot_conf = SPOT_CONF[spot_level]
+
+    # Prepare surfers
+    if mode == "realistic":
+        if ratio is not None:
+            raise ValueError("ratio is not supported for realistic mode")
+
+        surfer_config = prep_surfer_config(spot_level, mode, ratio, num_surfer)
+
+    elif mode == "experiment":
+        if ratio is None:
+            raise ValueError("experiment mode requires ratio (beginner_ratio)")
+
+        surfer_config = prep_surfer_config(spot_level, mode, ratio, num_surfer)
+
+    # Create surfers
+    surfers = [Surfer(skill=s) for s in surfer_config["skills"]]
+
+    # Generate wave schedule (if not provided)
+    if wave_schedule is None:
+        wave_schedule = simulate_waves(duration, spot_conf)
+
+    # Run simulation per second
+    for t in range(duration):
+
+        # spawn new waves
+        for w in wave_schedule:
+            if (not w['spawned']) and w['spawn_time'] <= t:
+                Wave(w['height'], w['speed'])
+                w['spawned'] = True
+
+        # update waves
+        Wave.update_all()
+
+        # update surfers
+        Surfer.update_all(rule_type, Wave.all_waves, t)
+
+    # Compute statistics
+    stats = compute_stats(surfers, wave_schedule, spot_level, ratio, seed)
+
+    return stats
 
 def main():
     waves, surfers, stats = run_simulation()

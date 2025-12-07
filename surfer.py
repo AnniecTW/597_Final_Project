@@ -53,11 +53,19 @@ class Surfer:
         for other in Surfer.all_surfers:
             if other is self:
                 continue
-            if self.curr_riding_wave is None or other.curr_riding_wave is None:
-                continue
-            if self.curr_riding_wave != other.curr_riding_wave:
+
+            # case 1: both floaters -> skip
+            if self.curr_riding_wave is None and other.curr_riding_wave is None:
                 continue
 
+            # case 2: both riding but on different waves -> skip
+            if self.curr_riding_wave is not None and other.curr_riding_wave is not None:
+                if self.curr_riding_wave != other.curr_riding_wave:
+                    continue
+
+            # other situations:
+            #  - both riding same wave
+            #  - rider vs floater
             dx = self.x - other.x
             dy = self.y - other.y
 
@@ -209,7 +217,7 @@ class Surfer:
             self.curr_riding_wave = None
             self.ride_already_counted = False
 
-    # Update all surfers every second
+    # Update single surfer
     def update_state_and_position(self, rule_type, active_waves, current_time):
         """
 
@@ -228,4 +236,8 @@ class Surfer:
         elif self.state == 'wipeout':
             self.update_wipeout_state()
 
-
+    @classmethod
+    # Update all surfers
+    def update_all(cls, rule_type, active_waves, current_time):
+        for surfer in list(cls.all_surfers):
+            surfer.update_state_and_position(rule_type, active_waves, current_time)
