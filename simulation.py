@@ -8,6 +8,33 @@ from wave import *
 
 
 def simulate_waves(duration, spot_conf):
+    """
+
+    :param duration:
+    :param spot_conf:
+    :return:
+    >>> from config import SPOT_CONF
+    >>> simulate_waves(0.0, SPOT_CONF["beginner"])
+    []
+    >>> simulate_waves(1000, {}) # edge case
+    []
+    >>> w = simulate_waves(1000, SPOT_CONF["beginner"])
+    >>> len(w) > 0
+    True
+    >>> w # doctest: +ELLIPSIS
+    [..., {'spawn_time': ..., 'height': ..., 'speed': ..., 'spawned': ...}, ...]
+    >>> waves = simulate_waves(1000, SPOT_CONF["mixed"])
+    >>> all([0 <= w['spawn_time'] <= 1000 for w in waves])
+    True
+    >>> waves = simulate_waves(1000, SPOT_CONF["advanced"])
+    >>> h_min = SPOT_CONF["advanced"]["wave_height"]["min"]
+    >>> h_max = SPOT_CONF["advanced"]["wave_height"]["max"]
+    >>> all([h_min <= w['height'] <= h_max for w in waves])
+    True
+    """
+    if not spot_conf:
+        return []
+
     wave_schedule = []
     t = 0
     lambda_wavecount = spot_conf['lambda_set']
@@ -49,6 +76,25 @@ def simulate_waves(duration, spot_conf):
 
 # AI idea check - 4
 def gini(x):
+    """
+
+    :param x:
+    :return:
+    >>> gini([])
+    0.0
+    >>> gini([1])
+    0.0
+    >>> g = gini([1, 2, 3, 4, 5])
+    >>> 0 <= g <= 1
+    True
+    >>> gini(20) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    TypeError: x must be list
+    """
+    if not isinstance(x, list):
+        raise TypeError("x must be list")
+
     x = np.array(x, dtype=np.float64)
 
     if np.all(x == 0):
@@ -63,10 +109,33 @@ def gini(x):
     diff_sum = np.abs(x[:, None] - x[None, :]).sum()
     n = len(x)
 
-    return diff_sum / (2 * n ** 2 * mean_x)
+    return float(diff_sum / (2 * n ** 2 * mean_x))
 
 # AI idea organization - 1
 def prep_surfer_config(spot_level, mode, ratio, num_surfer):
+    """
+
+    :param spot_level:
+    :param mode:
+    :param ratio:
+    :param num_surfer:
+    :return:
+    >>> from config import SPOT_CONF
+    >>> s_config = prep_surfer_config("beginner", "realistic", None, None)
+    >>> s_config # doctest: +ELLIPSIS
+    {'skills': array(...), 'num_surfer': ..., 'mode': 'realistic'}
+    >>> # range check
+    >>> 10 <= s_config['num_surfer'] <= 150
+    True
+    >>> all(0 <= s <= 1 for s in s_config['skills'])
+    True
+    >>> sur_config = prep_surfer_config("mixed", "experiment", 1, 40)
+    >>> sur_config # doctest: +ELLIPSIS
+    {'skills': array(...), 'num_surfer': 40, 'mode': 'experiment', 'beginner_ratio': 1}
+    >>> all(0 <= sur <= 1 for sur in sur_config['skills'])
+    True
+    """
+
     config = {}
 
     if mode == "realistic":
@@ -111,7 +180,17 @@ def prep_surfer_config(spot_level, mode, ratio, num_surfer):
 
     return config
 
-def compute_stats(surfers,wave_schedule, spot_level, ratio, seed):
+def compute_stats(surfers, wave_schedule, spot_level, ratio, seed):
+    """
+
+    :param surfers:
+    :param wave_schedule:
+    :param spot_level:
+    :param ratio:
+    :param seed:
+    :return:
+
+    """
     success_wave_counts = [s.stats['success'] for s in surfers]  # success wave count for each person
     fairness = gini(success_wave_counts)
 
