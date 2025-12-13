@@ -106,9 +106,8 @@ EXPR_CONF = {
 }
 
 # Scenario settings
-SPOT_LEVEL = "mixed"      # beginner / mixed / advanced
-RULE_TYPE = "free_for_all"   # free_for_all / first_in_line
-BOARD_TYPE = "longboard"     # shortboard / longboard
+SPOT_LEVEL = "beginner"      # beginner / mixed / advanced
+RULE_TYPE = "free_for_all"   # free_for_all / safe_distance
 
 # Surfer settings
 LINEUP_X_NEAR_SHORE = 10

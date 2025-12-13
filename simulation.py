@@ -16,7 +16,7 @@ def simulate_waves(duration, spot_conf):
     >>> from config import SPOT_CONF
     >>> simulate_waves(0.0, SPOT_CONF["beginner"])
     []
-    >>> simulate_waves(1000, {}) # edge case
+    >>> simulate_waves(1000, {})
     []
     >>> w = simulate_waves(1000, SPOT_CONF["beginner"])
     >>> len(w) > 0
@@ -180,14 +180,13 @@ def prep_surfer_config(spot_level, mode, ratio, num_surfer):
 
     return config
 
-def compute_stats(surfers, wave_schedule, spot_level, ratio, seed):
+def compute_stats(surfers, wave_schedule, spot_level, ratio):
     """
 
     :param surfers:
     :param wave_schedule:
     :param spot_level:
     :param ratio:
-    :param seed:
     :return:
 
     """
@@ -196,9 +195,9 @@ def compute_stats(surfers, wave_schedule, spot_level, ratio, seed):
 
     total_collision = sum(s.stats['collisions'] for s in surfers)
     total_success = sum(s.stats['success'] for s in surfers)
-    wait_sum = np.array([s.waiting_time_sum for s in surfers])
-    success_counts = np.array([max(1, s.stats['success']) for s in surfers])
-    avg_wait_per_wave = wait_sum.sum() / success_counts.sum() if success_counts.sum() else 0
+    wait_sum = np.array([s.waiting_time_sum if s.waiting_time_sum > 0 else SESSION_DURATION for s in surfers ])
+    success_counts = np.array([s.stats['success'] for s in surfers])
+    avg_wait_time = wait_sum.sum() / success_counts.sum() if success_counts.sum() > 0 else SESSION_DURATION
 
     return {
         "spot_level": spot_level,
@@ -207,9 +206,8 @@ def compute_stats(surfers, wave_schedule, spot_level, ratio, seed):
         'wave_counts': len(wave_schedule),
         'success_rate': total_success / len(surfers) if len(surfers) else 0.0,
         'collision_rate': total_collision / len(surfers) if len(surfers) else 0.0,
-        'avg_waiting_time': float(avg_wait_per_wave),
+        'avg_waiting_time': float(avg_wait_time),
         'fairness': float(fairness),
-        "seed": seed,
     }
 
 # AI logic organization -1
@@ -222,12 +220,7 @@ def run_simulation(
         wave_schedule=None,
         mode=EXPR_CONF["mode"],
         duration=SESSION_DURATION,
-        seed=None,
 ):
-
-    # Random seed
-    if seed is not None:
-        np.random.seed(seed)
 
     # Reset global trackers
     Wave.all_waves = []
@@ -273,7 +266,7 @@ def run_simulation(
         Surfer.update_all(rule_type, Wave.all_waves, t)
 
     # Compute statistics
-    stats = compute_stats(surfers, wave_schedule, spot_level, ratio, seed)
+    stats = compute_stats(surfers, wave_schedule, spot_level, ratio)
 
     return stats
 

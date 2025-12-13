@@ -145,8 +145,8 @@ class Surfer:
 
     def update_waiting_state(self, rule_type, active_waves):
         for wave in active_waves:
-            if rule_type == "first_in_line":
-                if any(abs(self.y - oy) <= 3 for oy in wave.occupied_y):
+            if rule_type == "safe_distance":
+                if any(abs(self.y - oy) <= 10 for oy in wave.occupied_y):
                     continue
             if abs(wave.x - self.x) <= 2:
                 attempt = np.random.rand() < self.prob_attempt(wave.height)
