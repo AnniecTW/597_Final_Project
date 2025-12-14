@@ -180,24 +180,41 @@ def prep_surfer_config(spot_level, mode, ratio, num_surfer):
 
     return config
 
-def compute_stats(surfers, wave_schedule, spot_level, ratio):
+def compute_stats(surfers: list, wave_schedule: list, spot_level: str, ratio: float) -> dict:
     """
-
+    Computes statistics for the simulation.
     :param surfers:
     :param wave_schedule:
     :param spot_level:
     :param ratio:
     :return:
+    >>> class MockSurfer:
+    ...     def __init__(self, success, collisions, wait_sum):
+    ...         self.stats = {"success": success, "collisions": collisions}
+    ...         self.waiting_time_sum = wait_sum
 
+    >>> # Case 1: normal situation
+    >>> s1 = MockSurfer(5, 3, 100)
+    >>> s2 = MockSurfer(1, 2, 200)
+    >>> surfers = [s1, s2]
+    >>> schedule = [1, 2, 3]
+    >>> compute_stats(surfers, schedule, "beginner", 0.5)
+    {'spot_level': 'beginner', 'n_surfers': 2, 'beginner_ratio': 0.5, 'wave_counts': 3, 'success_rate': 3.0, 'collision_rate': 2.5, 'avg_waiting_time': 50.0, 'fairness': 0.3333333333333333}
+    >>> compute_stats([], [], "mixed", 0.0)
+    {'spot_level': 'mixed', 'n_surfers': 0, 'beginner_ratio': 0.0, 'wave_counts': 0, 'success_rate': 0.0, 'collision_rate': 0.0, 'avg_waiting_time': 0.0, 'fairness': 0.0}
     """
     success_wave_counts = [s.stats['success'] for s in surfers]  # success wave count for each person
     fairness = gini(success_wave_counts)
-
     total_collision = sum(s.stats['collisions'] for s in surfers)
     total_success = sum(s.stats['success'] for s in surfers)
     wait_sum = np.array([s.waiting_time_sum if s.waiting_time_sum > 0 else SESSION_DURATION for s in surfers ])
-    success_counts = np.array([s.stats['success'] for s in surfers])
-    avg_wait_time = wait_sum.sum() / success_counts.sum() if success_counts.sum() > 0 else SESSION_DURATION
+
+    if total_success > 0:
+        avg_wait_time = wait_sum.sum() / total_success
+    elif len(surfers) == 0:
+        avg_wait_time = 0.0
+    else:
+        avg_wait_time = SESSION_DURATION
 
     return {
         "spot_level": spot_level,
@@ -221,6 +238,19 @@ def run_simulation(
         mode=EXPR_CONF["mode"],
         duration=SESSION_DURATION,
 ):
+    """
+
+    :param spot_level:
+    :param rule_type:
+    :param num_surfer:
+    :param ratio:
+    :param spot_conf:
+    :param wave_schedule:
+    :param mode:
+    :param duration:
+    :return:
+
+    """
 
     # Reset global trackers
     Wave.all_waves = []
