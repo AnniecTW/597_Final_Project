@@ -21,6 +21,9 @@ def simulate_waves(duration, spot_conf):
     >>> w = simulate_waves(1000, SPOT_CONF["beginner"])
     >>> len(w) > 0
     True
+    >>> speeds = [w["speed"] for w in w]
+    >>> len(set(speeds)) == 1
+    True
     >>> w # doctest: +ELLIPSIS
     [..., {'spawn_time': ..., 'height': ..., 'speed': ..., 'spawned': ...}, ...]
     >>> waves = simulate_waves(1000, SPOT_CONF["mixed"])
@@ -69,9 +72,9 @@ def simulate_waves(duration, spot_conf):
             # handle wave speed
             s_min = spot_conf['wave_speed']['min']
             s_max = spot_conf['wave_speed']['max']
-            speed = np.random.uniform(s_min, s_max)
+            session_base_speed = np.random.uniform(s_min, s_max)
 
-            wave_schedule.append({'spawn_time': spawn_time, 'height': height, 'speed': speed, 'spawned': False})
+            wave_schedule.append({'spawn_time': spawn_time, 'height': height, 'speed': session_base_speed, 'spawned': False})
     return wave_schedule
 
 # AI idea check - 4
@@ -199,9 +202,9 @@ def compute_stats(surfers: list, wave_schedule: list, spot_level: str, ratio: fl
     >>> surfers = [s1, s2]
     >>> schedule = [1, 2, 3]
     >>> compute_stats(surfers, schedule, "beginner", 0.5)
-    {'spot_level': 'beginner', 'n_surfers': 2, 'beginner_ratio': 0.5, 'wave_counts': 3, 'success_rate': 3.0, 'collision_rate': 2.5, 'avg_waiting_time': 50.0, 'fairness': 0.3333333333333333}
+    {'spot_level': 'beginner', 'n_surfers': 2, 'beginner_ratio': 0.5, 'wave_counts': 3, 'avg_success_count': 3.0, 'avg_collision_count': 2.5, 'avg_waiting_time': 50.0, 'fairness': 0.3333333333333333}
     >>> compute_stats([], [], "mixed", 0.0)
-    {'spot_level': 'mixed', 'n_surfers': 0, 'beginner_ratio': 0.0, 'wave_counts': 0, 'success_rate': 0.0, 'collision_rate': 0.0, 'avg_waiting_time': 0.0, 'fairness': 0.0}
+    {'spot_level': 'mixed', 'n_surfers': 0, 'beginner_ratio': 0.0, 'wave_counts': 0, 'avg_success_count': 0.0, 'avg_collision_count': 0.0, 'avg_waiting_time': 0.0, 'fairness': 0.0}
     """
     success_wave_counts = [s.stats['success'] for s in surfers]  # success wave count for each person
     fairness = gini(success_wave_counts)
@@ -221,8 +224,8 @@ def compute_stats(surfers: list, wave_schedule: list, spot_level: str, ratio: fl
         "n_surfers": len(surfers),
         "beginner_ratio": ratio,
         'wave_counts': len(wave_schedule),
-        'success_rate': total_success / len(surfers) if len(surfers) else 0.0,
-        'collision_rate': total_collision / len(surfers) if len(surfers) else 0.0,
+        'avg_success_count': total_success / len(surfers) if len(surfers) else 0.0,
+        'avg_collision_count': total_collision / len(surfers) if len(surfers) else 0.0,
         'avg_waiting_time': float(avg_wait_time),
         'fairness': float(fairness),
     }
@@ -249,6 +252,12 @@ def run_simulation(
     :param mode:
     :param duration:
     :return:
+    >>> res = run_simulation(wave_schedule=[])
+    >>> [res["avg_success_count"], res["avg_collision_count"], res["fairness"]]
+    [0.0, 0.0, 0.0]
+    >>> res["avg_waiting_time"] == SESSION_DURATION
+    True
+    >>>
 
     """
 

@@ -17,9 +17,9 @@ SPOT_CONF = {
     "beginner": {
         "wave_height": {
             "min": 0.3,
-            "max": 1.5,
-            "mu": 0.2,
-            "sigma": 0.25,
+            "max": 1.2,
+            "mu": -0.5,
+            "sigma": 0.4,
         },
         "skill": {
             "alpha": 2.0,
@@ -31,15 +31,15 @@ SPOT_CONF = {
             "std": 20
         },
         "wave_speed": {
-            "min": 2.2,
-            "max": 4.5,
+            "min": 2.0,
+            "max": 4.0,
         }
     },
     "mixed": {
         "wave_height": {
-            "min": 0.5,
-            "max": 3.5,
-            "mu": 0.8,
+            "min": 0.8,
+            "max": 2.0,
+            "mu": 0.25,
             "sigma": 0.35,
         },
         "skill": {
@@ -52,15 +52,15 @@ SPOT_CONF = {
             "std": 30
         },
         "wave_speed": {
-            "min": 4.5,
-            "max": 6.7,
+            "min": 3.5,
+            "max": 5.5,
         }
     },
     "advanced": {
         "wave_height": {
-            "min": 0.8,
-            "max": 5.5,
-            "mu": 1.2,
+            "min": 1.0,
+            "max": 3.5,
+            "mu": 0.7,
             "sigma": 0.4,
         },
         "skill": {
@@ -73,8 +73,8 @@ SPOT_CONF = {
             "std": 10
         },
         "wave_speed": {
-            "min": 6.7,
-            "max": 8.9,
+            "min": 4.5,
+            "max": 7.5,
         }
     },
 }
