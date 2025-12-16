@@ -14,7 +14,7 @@ The simulation models the interaction between:
 * **Fairness:** How evenly waves are shared among the crowd
 * **Efficiency:** Average waiting time (defined as the time between two successful rides)
 
-## 🎯 Hypotheses & Objectives
+## Hypotheses & Objectives
 The primary goal of this project is to investigate the following hypotheses:
 
 1.  **Hypothesis 1:** Under Free-for-All rules, advanced lineups are more efficient and fair (lower waiting time and Gini score) compared to chaotic beginner lineups.
@@ -74,7 +74,7 @@ python main.py
 
 ## Results
 
-## 📚 References
+## References
 1. Longuet-Higgins, M. S. (1952). On the statistical distribution of the heights of sea waves. *Journal of Marine Research*, *11*(3), 245-266.
 2. Holthuijsen, L. H. (2007). *Waves in oceanic and coastal waters*. Cambridge University Press.
 3. Ochi, M. K., & Tsai, C. H. (1983). Prediction of non-Gaussian random processes. *Journal of Ship Research*, *27*(03), 177-184.
