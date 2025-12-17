@@ -73,6 +73,39 @@ python main.py
 ```
 
 ## Results
+Here are the main findings from our Monte Carlo simulation.
+
+### 1. Spot Comparison (H1)
+Our results **strongly supported** the hypothesis: Higher skill levels make the lineup run much smoother and safer.
+<img src="figures/H1_spot_level_comparison.png" alt="Baseline Comparison" width="500">
+
+* **Efficiency Boost:** Moving from Beginner to Advanced, the average success count **doubles**, while collisions drop by ~25%.
+* **Less Waiting:** Waiting time drops significantly in advanced spots.
+    * *Reason:* Beginners waste a lot of time missing waves or wiping out, whereas advanced surfers are consistent and cycle through waves quickly.
+* **The "Fairness" Surprise:**
+    * We found that the Gini Index **dropped** (became fairer) in advanced spots.
+    * *Insight:* Instead of a few pros hogging everything, skilled surfers actually share waves more evenly compared to the chaotic distribution in beginner spots.
+
+### 2. Rule Analysis (H2)
+Contrary to our expectations, the simulation results were **surprisingly similar** regardless of the rules.
+
+* **Skill > Rules:** Across all spot levels, success and collision rates remained almost identical. This suggests that **skill level** plays a much bigger role in safety than specific rules do.
+* **The "Fairness Paradox" (Beginner Spot):**
+    * We found that the "Safe-Distance" rule actually made the beginner spot **less fair**!
+    * *Reason:* The rule acts as a barrier. It restricts struggling surfers from going for waves, while the "Free-for-All" chaos ironically gives everyone a random, equal chance to try.
+* **Redundancy (Advanced Spot):**
+    * In Advanced spots, the difference between rules practically disappears.
+    * *Reason:* Pros don't need a rule to tell them how to surf. They naturally space themselves out and pick waves efficiently, making the "Safe-Distance" rule redundant.
+
+### 3. Sensitivity Analysis (H3)
+We hypothesized that higher waves would act as a filter. The results **partially supported** this.
+![Sensitivity Analysis](figures/H3_wave_sensitivity_analysis.png)
+* **The "Filtering Effect":** Increasing wave height by 50% didn't change much in the Beginner spot. However, in Mixed and Advanced spots, the bigger waves actually **lowered collision counts**.
+* **Collision Paradox:**
+    * *Beginner Spots:* More beginners = More crashes (as expected).
+    * *Advanced Spots:* Interestingly, more beginners led to **fewer** crashes!
+    * *Reason:* The waves were too difficult for the beginners to catch, so they didn't even have the chance to collide.
+* **Conclusion:** Advanced spots are much more sensitive to wave conditions. Changes in wave height have a huge impact there, whereas beginner spots remain relatively stable.
 
 ## References
 1. Longuet-Higgins, M. S. (1952). On the statistical distribution of the heights of sea waves. *Journal of Marine Research*, *11*(3), 245-266.
