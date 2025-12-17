@@ -26,6 +26,19 @@ The primary goal of this project is to investigate the following hypotheses:
 * To visualize the trade-off between safety (collision rate) and performance (waiting time/successful rides) when using different rules.
 * To analyze how wave conditions affect lineup efficiency, safety, and fairness (Gini score) in sharing waves.
 
+## Model Design
+<img width="330" alt="model_design" src="https://github.com/user-attachments/assets/58e46a02-18b6-4c45-984c-a3d7b0a73d1f" />
+
+**Figure 1: Simulation State Cycle.**
+This diagram illustrates the basic logic and movement within the simulation. The model follows the natural cycle of surfing, where each agent(surfer) transitions between four main states:
+
+* **Paddling:** Agents moving towards the lineup.
+* **Waiting:** Agents positioning themselves to catch a wave.
+* **Surfing:** Successful rides towards the shore.
+* **Colliding:** Instances where agents crash into each other, resulting in a failed ride.
+
+The simulation updates the status of every surfer at each time step, depending on the stochastic generation of incoming waves and the specific rules assigned to each surfer.
+
 ## Key Variables
 
 Random Variables:
