@@ -27,9 +27,13 @@ The primary goal of this project is to investigate the following hypotheses:
 * To analyze how wave conditions affect lineup efficiency, safety, and fairness (Gini score) in sharing waves.
 
 ## Model Design
-<img width="330" alt="model_design" src="https://github.com/user-attachments/assets/58e46a02-18b6-4c45-984c-a3d7b0a73d1f" />
+<div align="center">
+    <img width="330" alt="model_design" src="https://github.com/user-attachments/assets/58e46a02-18b6-4c45-984c-a3d7b0a73d1f" />
+    <br>
+    <b>Figure 1: Simulation State Cycle</b>
+</div>
+<br>
 
-**Figure 1: Simulation State Cycle.**
 This diagram illustrates the basic logic and movement within the simulation. The model follows the natural cycle of surfing, where each agent(surfer) transitions between four main states:
 
 * **Paddling:** Agents moving towards the lineup.
@@ -90,7 +94,10 @@ Here are the main findings from our Monte Carlo simulation.
 
 ### 1. Spot Comparison (H1)
 Our results **strongly supported** the hypothesis: Higher skill levels make the lineup run much smoother and safer.
-<img src="figures/H1_spot_level_comparison.png" alt="Baseline Comparison" width="500">
+<div align="center">
+   <img src="figures/H1_spot_level_comparison.png" alt="Baseline Comparison" width="500">
+   <br>
+</div>
 
 * **Efficiency Boost:** Moving from Beginner to Advanced, the average success count **doubles**, while collisions drop by ~25%.
 * **Less Waiting:** Waiting time drops significantly in advanced spots.
