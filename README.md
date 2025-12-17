@@ -45,14 +45,14 @@ Control Variables:
 ## Project Structure
 ```text
 project-root/
-├── data/               # Raw and processed datasets
+├── tests/               # Unit tests to verify code logic (using pytest)
 ├── src/                # Source code for simulation and analysis
 │   ├── simulation.py   # Core simulation engine (manages time steps and object instantiation)
 │   ├── surfer.py       # Surfer class definition (blueprint for agent behavior and logic)
 │   ├── wave.py        # Wave class definition (blueprint for wave attributes)
 │   ├── config.py       # Global constants and simulation hyperparameters
 │   └── MC_Sim.ipynb    # Jupyter Notebook for interactive testing and prototyping
-├── results/            # Generated figures and reports
+├── figures/            # Generated plots and visualization results
 ├── main.py             # Entry point to run the full simulation
 ├── requirements.txt    # Python dependencies
 └── README.md           # Project documentation
