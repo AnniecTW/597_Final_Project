@@ -133,6 +133,24 @@ We hypothesized that higher waves would act as a filter. The results **partially
 3. Ochi, M. K., & Tsai, C. H. (1983). Prediction of non-Gaussian random processes. *Journal of Ship Research*, *27*(03), 177-184.
 4. Helbing, D., Farkas, I., & Vicsek, T. (2000). Simulating dynamical features of escape panic. *Nature*, *407*, 487–490.
 
+## Appendix: Statement of AI Assistance
+
+**Summary**
+
+In this project, Generative AI tools were utilized primarily for code skeleton organization, syntax debugging, library assistance (matplotlib), and logic verification. All core simulation concepts, domain assumptions (surfer behaviors), and parameter definitions were established by the author.
+
+**Detailed Usage Log**
+
+| ID | Category | Description & User Contribution |
+| :--- | :--- | :--- |
+| **Idea Check - 1** | Simulation Parameters | **User:** Defined that simulation requires random surfer counts, but validation/testing requires fixed values.<br>**AI:** Suggested methods for setting fixed values to ensure experimental control. |
+| **Idea Check - 2** | Surfer Behavior Model | **User:** Designed the specific logic for surfer initialization (waiting vs. paddling based on skill) and "best position" (bp) targeting behavior.<br>**AI:** Provided feedback on setting initial states to match these user-defined rules. |
+| **Idea Org - 1** | Code Architecture | **User:** Proposed separating parameter generation (Experiment vs. Realistic modes) from the main `run_simulation` function.<br>**AI:** Assisted in structuring the code to implement this separation of concerns effectively. |
+| **Logic Check - 1** | Debugging | **User:** Wrote the initial simulation code.<br>**AI:** Reviewed the script and suggested minor syntax and logical corrections. |
+| **Logic Check - 2** | Logic Validation | **User:** Shared the completed logic flow and conceptual framework.<br>**AI:** Provided feedback on potential edge cases and logic gaps. |
+| **Idea Check - 3** | Metric Validity | **User:** Proposed a specific method for calculating "Fairness".<br>**AI:** Verified if the calculation method aligns with standard statistical definitions. |
+| **Logic Org - 1** | Refactoring | **AI:** Suggested improvements for function readability (e.g., variable naming, spacing) on the user's completed code. |
+| **Coding Asst** | Visualization | **User:** Provided the raw simulation data.<br>**AI:** Generated the `matplotlib` code to create clear and interpretative charts. |
 ---
 
 This project is the final assignment for IS597 - Programming & Quality in Analytics (Fall 2025).
