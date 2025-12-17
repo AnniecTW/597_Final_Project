@@ -2,7 +2,7 @@ import pandas as pd
 from src.surfer import *
 from src.wave import *
 
-# AI idea check - 3
+# AI logic check - 3
 def gini(x):
     """
     Computes the Gini index to quantify the inequality of wave distribution among surfers.
@@ -108,7 +108,7 @@ def simulate_waves(duration, spot_conf):
             wave_schedule.append({'spawn_time': spawn_time, 'height': height, 'speed': session_base_speed, 'spawned': False})
     return wave_schedule
 
-# AI idea organization - 1
+# AI idea check - 1
 def prep_surfer_config(spot_level, mode, ratio, num_surfer):
     """
     Prepare the surfer configuration dictionary, including skill levels and counts.

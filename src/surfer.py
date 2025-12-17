@@ -28,7 +28,7 @@ class Surfer:
         self.speed = self.PADDLE_SPEED_BASE + skill * self.PADDLE_SPEED_SKILL_COEFF
         self.bp = BP_X_MIN + self.skill * (BP_X_MAX - BP_X_MIN)
 
-        self.state = self.initial_state()  # AI idea check - 1
+        self.state = self.initial_state()
 
         self.stats = Counter()
 
@@ -40,6 +40,7 @@ class Surfer:
 
         Surfer.all_surfers.append(self)
 
+    # AI idea check - 2
     def initial_x(self):
         """
         The initial x coordinate of the surfer. Surfers are distributed based on their skill levels.
@@ -116,7 +117,7 @@ class Surfer:
         # higher skill, often higher attempt rate
         baseline_interest = 0.2 * self.skill
 
-        factor = 0.7 * comfort + 0.3 * baseline_interest  # AI idea check - 4
+        factor = 0.7 * comfort + 0.3 * baseline_interest  # AI logic check - 1
 
         # Map comfort to attempt rate between 0.1 and 0.9
         attempt_rate = ATTEMPT_RATE_MIN + (ATTEMPT_RATE_MAX - ATTEMPT_RATE_MIN) * factor
@@ -141,7 +142,7 @@ class Surfer:
 
         skill_factor = 1 - self.skill # higher skill, lower sensitivity to wave height
 
-        return min(1, max(0, self.skill * (1 - ALPHA_SUCCESS * h * skill_factor)))  # AI idea check - 3
+        return min(1, max(0, self.skill * (1 - ALPHA_SUCCESS * h * skill_factor)))  # AI logic check - 2
 
     def prob_wipeout(self, wave_height):
         """
