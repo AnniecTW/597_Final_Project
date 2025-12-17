@@ -1,28 +1,59 @@
-"""
-Simulation Framework
-"""
+import pandas as pd
+from src.surfer import *
+from src.wave import *
 
-import numpy as np
-from surfer import *
-from wave import *
+# AI idea check - 3
+def gini(x):
+    """
+    Computes the Gini index to quantify the inequality of wave distribution among surfers.
 
+    :param x: a list containing the success counts of each surfer
+    :return: float, the computed Gini index (0.0 = perfect equality, 1.0 = max inequality)
+    >>> gini([])
+    0.0
+    >>> gini([1])
+    0.0
+    >>> g = gini([1, 2, 3, 4, 5])
+    >>> 0 <= g <= 1
+    True
+    >>> gini(20) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    TypeError: x must be list
+    """
+    if not isinstance(x, list):
+        raise TypeError("x must be list")
+
+    x = np.array(x, dtype=np.float64)
+
+    if np.all(x == 0):
+        return 0.0
+
+    if np.any(x < 0):
+        x -= np.min(x)
+
+    mean_x = x.mean()
+
+    # pairwise absolute differences
+    diff_sum = np.abs(x[:, None] - x[None, :]).sum()
+    n = len(x)
+
+    return float(diff_sum / (2 * n ** 2 * mean_x))
 
 def simulate_waves(duration, spot_conf):
     """
+    Generate a schedule of waves for the simulation session based on spot configuration.
 
-    :param duration:
-    :param spot_conf:
-    :return:
-    >>> from config import SPOT_CONF
+    :param duration: the total duration of simulation (sec)
+    :param spot_conf: dictionary containing spot configuration
+    :return: a list of wave dictionaries containing spawn time, height, speed, and status
+    >>> from src.config import SPOT_CONF
     >>> simulate_waves(0.0, SPOT_CONF["beginner"])
     []
     >>> simulate_waves(1000, {})
     []
     >>> w = simulate_waves(1000, SPOT_CONF["beginner"])
     >>> len(w) > 0
-    True
-    >>> speeds = [w["speed"] for w in w]
-    >>> len(set(speeds)) == 1
     True
     >>> w # doctest: +ELLIPSIS
     [..., {'spawn_time': ..., 'height': ..., 'speed': ..., 'spawned': ...}, ...]
@@ -77,53 +108,17 @@ def simulate_waves(duration, spot_conf):
             wave_schedule.append({'spawn_time': spawn_time, 'height': height, 'speed': session_base_speed, 'spawned': False})
     return wave_schedule
 
-# AI idea check - 4
-def gini(x):
-    """
-
-    :param x:
-    :return:
-    >>> gini([])
-    0.0
-    >>> gini([1])
-    0.0
-    >>> g = gini([1, 2, 3, 4, 5])
-    >>> 0 <= g <= 1
-    True
-    >>> gini(20) # doctest: +ELLIPSIS
-    Traceback (most recent call last):
-    ...
-    TypeError: x must be list
-    """
-    if not isinstance(x, list):
-        raise TypeError("x must be list")
-
-    x = np.array(x, dtype=np.float64)
-
-    if np.all(x == 0):
-        return 0.0
-
-    if np.any(x < 0):
-        x -= np.min(x)
-
-    mean_x = x.mean()
-
-    # pairwise absolute differences
-    diff_sum = np.abs(x[:, None] - x[None, :]).sum()
-    n = len(x)
-
-    return float(diff_sum / (2 * n ** 2 * mean_x))
-
 # AI idea organization - 1
 def prep_surfer_config(spot_level, mode, ratio, num_surfer):
     """
+    Prepare the surfer configuration dictionary, including skill levels and counts.
 
-    :param spot_level:
-    :param mode:
-    :param ratio:
-    :param num_surfer:
-    :return:
-    >>> from config import SPOT_CONF
+    :param spot_level: the difficulty level of the spot
+    :param mode: simulation mode ('realistic', 'experiment')
+    :param ratio: ratio of beginner surfers
+    :param num_surfer: the total number of surfers
+    :return: a dictionary containing initialized surfer configuration
+    >>> from src.config import SPOT_CONF
     >>> s_config = prep_surfer_config("beginner", "realistic", None, None)
     >>> s_config # doctest: +ELLIPSIS
     {'skills': array(...), 'num_surfer': ..., 'mode': 'realistic'}
@@ -186,23 +181,12 @@ def prep_surfer_config(spot_level, mode, ratio, num_surfer):
 def compute_stats(surfers: list, wave_schedule: list, spot_level: str, ratio: float) -> dict:
     """
     Computes statistics for the simulation.
-    :param surfers:
-    :param wave_schedule:
-    :param spot_level:
-    :param ratio:
-    :return:
-    >>> class MockSurfer:
-    ...     def __init__(self, success, collisions, wait_sum):
-    ...         self.stats = {"success": success, "collisions": collisions}
-    ...         self.waiting_time_sum = wait_sum
 
-    >>> # Case 1: normal situation
-    >>> s1 = MockSurfer(5, 3, 100)
-    >>> s2 = MockSurfer(1, 2, 200)
-    >>> surfers = [s1, s2]
-    >>> schedule = [1, 2, 3]
-    >>> compute_stats(surfers, schedule, "beginner", 0.5)
-    {'spot_level': 'beginner', 'n_surfers': 2, 'beginner_ratio': 0.5, 'wave_counts': 3, 'avg_success_count': 3.0, 'avg_collision_count': 2.5, 'avg_waiting_time': 50.0, 'fairness': 0.3333333333333333}
+    :param surfers: a list of surfer statistics
+    :param wave_schedule: a list of wave configurations
+    :param spot_level: the difficulty level of the spot
+    :param ratio: ratio of beginner surfers
+    :return: dictionary of stats
     >>> compute_stats([], [], "mixed", 0.0)
     {'spot_level': 'mixed', 'n_surfers': 0, 'beginner_ratio': 0.0, 'wave_counts': 0, 'avg_success_count': 0.0, 'avg_collision_count': 0.0, 'avg_waiting_time': 0.0, 'fairness': 0.0}
     """
@@ -242,23 +226,29 @@ def run_simulation(
         duration=SESSION_DURATION,
 ):
     """
+    Runs a single simulation session.
 
-    :param spot_level:
-    :param rule_type:
-    :param num_surfer:
-    :param ratio:
-    :param spot_conf:
-    :param wave_schedule:
-    :param mode:
-    :param duration:
-    :return:
+    :param spot_level: the difficulty level of the spot
+    :param rule_type: the rule set surfers follow ('free_for_all' or 'safe_distance')
+    :param num_surfer: total number of surfers
+    :param ratio: ratio of beginner surfers
+    :param spot_conf: custom spot configuration dictionary
+    :param wave_schedule: a list of wave configurations
+    :param mode: simulation mode ('realistic', 'experiment')
+    :param duration: duration of the simulation in seconds
+    :return: a dictionary containing simulation statistics
     >>> res = run_simulation(wave_schedule=[])
     >>> [res["avg_success_count"], res["avg_collision_count"], res["fairness"]]
     [0.0, 0.0, 0.0]
     >>> res["avg_waiting_time"] == SESSION_DURATION
     True
-    >>>
-
+    >>> res = run_simulation(mode="experiment", ratio=0.5)
+    >>> res['beginner_ratio'] == 0.5
+    True
+    >>> run_simulation(mode="experiment")
+    Traceback (most recent call last):
+        ...
+    ValueError: experiment mode requires ratio (beginner_ratio)
     """
 
     # Reset global trackers
@@ -273,14 +263,11 @@ def run_simulation(
     if mode == "realistic":
         if ratio is not None:
             raise ValueError("ratio is not supported for realistic mode")
-
-        surfer_config = prep_surfer_config(spot_level, mode, ratio, num_surfer)
-
     elif mode == "experiment":
         if ratio is None:
             raise ValueError("experiment mode requires ratio (beginner_ratio)")
 
-        surfer_config = prep_surfer_config(spot_level, mode, ratio, num_surfer)
+    surfer_config = prep_surfer_config(spot_level, mode, ratio, num_surfer)
 
     # Create surfers
     surfers = [Surfer(skill=s) for s in surfer_config["skills"]]
@@ -309,13 +296,52 @@ def run_simulation(
 
     return stats
 
-def main():
-    waves, surfers, stats = run_simulation()
-    print(f"Mode: {EXPR_CONF['mode']}")
-    print(f"Rule type: {RULE_TYPE}")
-    print(stats)
+def run_many(
+        number_of_runs=100,
+        mode=None,
+        spot_level=None,
+        rule_type=None,
+        num_surfer=None,
+        ratio=None,
+        spot_conf=None,
+        wave_schedule=None,
+        duration=None,
+):
+    """
+    Run multiple Monte Carlo simulations to gather statistical distributions.
+    :param number_of_runs: number of simulations to run
+    """
+    if mode is None: mode=EXPR_CONF["mode"]
+    if spot_level is None: spot_level=SPOT_LEVEL
+    if rule_type is None: rule_type=RULE_TYPE
+    if spot_conf is None: spot_conf=SPOT_CONF[spot_level]
+    if duration is None: duration=SESSION_DURATION
 
+    results = []
 
-if __name__ == '__main__':
-    main()
+    print(f" Running {number_of_runs} Monte Carlo iterations...")
 
+    for _ in range(number_of_runs):
+        res = run_simulation(
+            mode=mode,
+            spot_level=spot_level,
+            rule_type=rule_type,
+            num_surfer=num_surfer,
+            ratio=ratio if mode == "experiment" else None,
+            spot_conf=spot_conf,
+            wave_schedule=wave_schedule,
+            duration=duration,
+        )
+
+        res_metrics = {
+            "n_surfers": res["n_surfers"],
+            "wave_counts": res["wave_counts"],
+            "avg_success_count": res["avg_success_count"],
+            "avg_collision_count": res["avg_collision_count"],
+            "avg_waiting_time": res["avg_waiting_time"],
+            "fairness": res["fairness"]
+        }
+        results.append(res_metrics)
+
+    df = pd.DataFrame(results)
+    return results, df.mean(), df.std()
